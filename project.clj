@@ -4,7 +4,8 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [me.raynes/conch "0.8.0"]]
+                 [me.raynes/conch "0.8.0"]
+                 [mount "0.1.12"]]
   :main ^:skip-aot mim.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
