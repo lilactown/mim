@@ -11,3 +11,23 @@
       :args ["some" "args" "passed" "to" "the" "cli"]
       :version "1.0"}
    #+END_SRC
+
+** mim.edn
+   #+BEGIN_SRC clojure
+     {:tasks {:some-key (task "echo hello"
+                              :cwd "/the/current/dir"
+                              :trampoline true)}}
+   #+END_SRC
+
+** Long-running processes
+   Add a "trampoline" section to the mim.edn spec which, when detected, writes
+   out the shell command to a file.
+   The client should detect that the trampoline file exists, read it's contents,
+   delete the file, then run the trampoline'd command.
+   I don't see any reason why this shouldn't be the default.
+   Basically, the mim server will be in charge of parsing the mim.edn file and
+   the args passed in.
+   The default "task" form will trampoline by default. It can turn trampoline
+   off to run the process inside of the mim process, which may allow future
+   enhancements (processing of output?), but at the moment gives no benefits
+   and avoids needing to detect when the client disconnects (for now).

@@ -1,1 +1,2 @@
-{:tasks {:build "echo hello"}}
+{:tasks {:build (mim/task "echo hi")
+         :asdf (task "cat > asdf")}}
