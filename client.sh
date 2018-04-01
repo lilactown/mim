@@ -25,7 +25,7 @@ usage() {
 
 send_payload() {
     echo "{:cwd \"$CWD\"\
-           :mode :from-config\
+           :command :from-config\
            :args \"$@\"\
            :version \"$VERSION\"}" | nc localhost 1234    
 }
@@ -36,7 +36,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-if [ "$1" -eq "--version" ]; then
+if [ "$1" = "--version" ]; then
     echo "mim version $VERSION"
     exit 0
 fi
@@ -48,6 +48,3 @@ if [ -r "$TRAMPOLINE_FILE" ]; then
     rm $TRAMPOLINE_FILE
     exec sh -c "exec $TRAMPOLINE"
 fi
-
-
-exit $EXIT_CODE

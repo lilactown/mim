@@ -1,3 +1,4 @@
 {:build (mim/task "ls"
                   :cwd "~/Code")
- :asdf (task "cat > asdf")}}
+ :asdf (mim/task "cat > asdf")
+ :test (println *ns*)}

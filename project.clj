@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.9.0"]
                  [me.raynes/conch "0.8.0"]
                  [mount "0.1.12"]
-                 [me.raynes/fs "1.4.6"]]
+                 [me.raynes/fs "1.4.6"]
+                 [org.clojure/tools.logging "0.4.0"]]
   :main ^:skip-aot mim.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

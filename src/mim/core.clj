@@ -5,13 +5,17 @@
             [clojure.edn :as edn]
             [clojure.string :as str]
             [clojure.java.io :as io]
-            [me.raynes.fs :as fs])
+            [me.raynes.fs :as fs]
+            [clojure.tools.logging :as log])
   (:gen-class))
 
 ;; (defn prompt []
 ;;   (print "=> ")
 ;;   (flush)
 ;;   (read-line))
+
+;; This atom keeps the main thread running until it's false
+(defonce running? (atom true))
 
 (defn parse-payload
   "Parses a string payload into EDN"
@@ -28,6 +32,24 @@
     (edn/read (java.io.PushbackReader. r))))
 
 
+(defn from-config
+  "Executes a form that is defined in a mim EDN file"
+  [{:keys [cwd args]}]
+  (let [config (read-config (str cwd "/mim.edn"))]
+    (log/info "Read mim.edn:" config)
+    ;; execute task
+    (let [key-path (map keyword args)
+          cmd (get-in config key-path)
+          ns-cmd `(do (require 'mim)
+                      ~cmd)]
+      (log/info (str "Executing `" cmd "`"))
+      (try
+        (println (eval ns-cmd))
+        (println 0)
+        (catch Exception e
+          (println (str "An error occurred: " (.getMessage e)))
+          (println 1))))))
+
 (defn server-handler
   "Handles an incoming socket request.
    Reads in an initial payload and parses it to EDN, checks to see if it
@@ -38,23 +60,11 @@
   [& args]
   (let [payload (parse-payload (read-line))]
     ;; validate payload
-    (println "Got payload:")
-    (println "\t" payload)
-    (let [cwd (:cwd payload)
-          args (:args payload)
-          config (read-config (str cwd "/mim.edn"))]
-      ;; validate config
-      (println "Read mim.edn:")
-      (println "\t" config)
-      ;; execute task
-      (let [key-path (map keyword args)
-            cmd (get-in config key-path)]
-        (println (str "Executing `" cmd "`"))
-        (println (try
-          (eval cmd)
-          (catch Exception e
-            (str "An error occurred: " (.getMessage e))))))
-      )
+    (log/info "Got payload:" payload)
+    (case (:command payload)
+      :from-config (from-config payload)
+      (println "Invalid command")
+      (println 1))
     ))
 
 (defstate socket-server
@@ -68,8 +78,14 @@
   [& args]
   (let [mim-folder (fs/expand-home "~/.mim")]
     (mount/start)
+    (println "started")
+    ;; Initialize the mim folder
     (when-not (fs/exists? mim-folder)
-      (fs/mkdir mim-folder))))
+      (fs/mkdir mim-folder))
+    (loop [continue @running?]
+      (when continue
+        (recur @running?)))
+    ))
 
 (comment (mount/stop)
          (fs/exists? (fs/expand-home "~/.mim")))
