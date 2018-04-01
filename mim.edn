@@ -1,2 +1,3 @@
-{:tasks {:build (mim/task "echo hi")
-         :asdf (task "cat > asdf")}}
+{:build (mim/task "ls"
+                  :cwd "~/Code")
+ :asdf (task "cat > asdf")}}

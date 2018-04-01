@@ -38,12 +38,14 @@
   [& args]
   (let [payload (parse-payload (read-line))]
     ;; validate payload
-    (println payload)
+    (println "Got payload:")
+    (println "\t" payload)
     (let [cwd (:cwd payload)
           args (:args payload)
           config (read-config (str cwd "/mim.edn"))]
       ;; validate config
-      (println config)
+      (println "Read mim.edn:")
+      (println "\t" config)
       ;; execute task
       (let [key-path (map keyword args)
             cmd (get-in config key-path)]

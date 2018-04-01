@@ -8,9 +8,17 @@
    #+BEGIN_SRC clojure
      ;; communicate using transit?
      {:cwd "path/with/mim.edn/in/it"
+      :mode :from-config
       :args ["some" "args" "passed" "to" "the" "cli"]
       :version "1.0"}
    #+END_SRC
+   
+   I'd like the capability both to execute from a mim.edn, as well as evaluate
+   arbitrary forms.
+
+   I could do this by sending a ~:mode~ key that tells it to just either read
+   the args as keys in the mim.edn, or to evalute the arguments as a clojure
+   form.
 
 ** mim.edn
    #+BEGIN_SRC clojure
@@ -31,3 +39,4 @@
    off to run the process inside of the mim process, which may allow future
    enhancements (processing of output?), but at the moment gives no benefits
    and avoids needing to detect when the client disconnects (for now).
+   
