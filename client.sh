@@ -25,6 +25,7 @@ usage() {
 
 send_payload() {
     echo "{:cwd \"$CWD\"\
+           :mode :from-config
            :args \"$@\"\
            :version \"$VERSION\"}" | nc localhost 1234    
 }
