@@ -1,14 +1,14 @@
 * Mim
   Client-server protocol is v important.
 
-  Server creates a ~port~ file in ~~/.mim~. This allows client to communicate
-  with running server anywhere.
+  Server creates a ~port~ and ~pid~ file in ~~/.mim~. This allows client to
+  communicate with running server anywhere.
 
 ** Client-server protocol
    #+BEGIN_SRC clojure
      ;; communicate using transit?
      {:cwd "path/with/mim.edn/in/it"
-      :command :from-config
+      :command :from-edn
       :args ["some" "args" "passed" "to" "the" "cli"]
       :version "1.0"}
    #+END_SRC
@@ -30,6 +30,8 @@
                               :cwd "/the/current/dir"
                               :trampoline true)}}
    #+END_SRC
+   
+   Executed with ~mim tasks some-key~
 
 ** Long-running processes
    Add a "trampoline" section to the mim.edn spec which, when detected, writes

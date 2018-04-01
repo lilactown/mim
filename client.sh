@@ -23,9 +23,9 @@ usage() {
 }
 
 
-send_payload() {
+send_from_config() {
     echo "{:cwd \"$CWD\"\
-           :command :from-config\
+           :command :from-edn\
            :args \"$@\"\
            :version \"$VERSION\"}" | nc localhost 1234    
 }
@@ -41,7 +41,14 @@ if [ "$1" = "--version" ]; then
     exit 0
 fi
 
-send_payload $@
+if [ "$1" = "stop" ]; then
+    echo "{:command :stop\
+           :version \"$VERSION\"}" | nc localhost 1234
+else
+    send_from_config $@
+fi
+
+
 
 if [ -r "$TRAMPOLINE_FILE" ]; then
     TRAMPOLINE="$(cat $TRAMPOLINE_FILE)"
