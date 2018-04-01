@@ -30,6 +30,14 @@
           (println (str "An error occurred: " (.getMessage e)))
           (println 1))))))
 
+(defn eval-form [{:keys [form in-ns]}]
+  (try
+    (println (eval form))
+    (println 0)
+    (catch Exception e
+      (println (str "An error occurred: " (.getMessage e)))
+      (println 1))))
+
 (defn stop
   "Stops the server"
   []

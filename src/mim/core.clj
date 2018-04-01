@@ -9,15 +9,12 @@
             [mim.commands :as commands])
   (:gen-class))
 
-;; (defn prompt []
-;;   (print "=> ")
-;;   (flush)
-;;   (read-line))
-
 ;; This atom keeps the main thread running until it's false
 (def running? (atom true))
 
-(defn keep-running []
+(defn keep-running
+  "Keeps the main thread running"
+  []
   (loop [continue @running?]
     (when continue
       (recur @running?))))
@@ -47,6 +44,7 @@
     (log/info "Got payload:" payload)
     (case (:command payload)
       :from-edn (commands/from-config payload)
+      :eval (commands/eval-form payload)
       :stop (commands/stop)
       (do (println "Invalid command")
           (println 1)))
@@ -63,7 +61,7 @@
   [& args]
   (let [mim-folder (fs/expand-home "~/.mim")]
     (mount/start)
-    (println "started")
+    (log/info "started")
     ;; Initialize the mim folder
     (when-not (fs/exists? mim-folder)
       (fs/mkdir mim-folder))

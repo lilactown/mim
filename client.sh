@@ -23,32 +23,39 @@ usage() {
 }
 
 
-send_from_config() {
+send_from_edn() {
     echo "{:cwd \"$CWD\"\
            :command :from-edn\
            :args \"$@\"\
            :version \"$VERSION\"}" | nc localhost 1234    
 }
 
+send_stop() {
+    echo "{:command :stop\
+           :version \"$VERSION\"}" | nc localhost 1234
+}
+
+send_form() {
+    echo "{:command :eval\
+           :version \"$VERSION\"\
+           :form ${@:2}}" | nc localhost 1234
+}
 
 if [ -z "$1" ]; then
     usage
     exit 1
-fi
-
-if [ "$1" = "--version" ]; then
-    echo "mim version $VERSION"
-    exit 0
-fi
-
-if [ "$1" = "stop" ]; then
-    echo "{:command :stop\
-           :version \"$VERSION\"}" | nc localhost 1234
 else
-    send_from_config $@
+    FST=$1
 fi
 
 
+
+case $FST in
+    "version"|"--version"|"-v") echo "mim version $VERSION";;
+    "stop") send_stop;;
+    "eval") send_form $@;;
+    *) send_from_edn $@;;
+esac
 
 if [ -r "$TRAMPOLINE_FILE" ]; then
     TRAMPOLINE="$(cat $TRAMPOLINE_FILE)"
