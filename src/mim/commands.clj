@@ -1,7 +1,8 @@
 (ns mim.commands
   (:require [clojure.java.io :as io]
             [clojure.edn :as edn]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [mim.state :as state]))
 
 (defn- read-config
   "Reads a mim EDN file and returns its contents"
@@ -42,6 +43,6 @@
   "Stops the server"
   []
   (println "Stopping server.")
-  (reset! mim.core/running? false))
+  (reset! mim.state/running? false))
 
 (comment mim.core/running?)

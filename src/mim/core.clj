@@ -6,18 +6,11 @@
             [clojure.string :as str]
             [me.raynes.fs :as fs]
             [clojure.tools.logging :as log]
-            [mim.commands :as commands])
+            [mim.commands :as commands]
+            [mim.pid :as pid]
+            [mim.state :as state])
   (:gen-class))
 
-;; This atom keeps the main thread running until it's false
-(def running? (atom true))
-
-(defn keep-running
-  "Keeps the main thread running"
-  []
-  (loop [continue @running?]
-    (when continue
-      (recur @running?))))
 
 (defn parse-payload
   "Parses a string payload into EDN"
@@ -43,7 +36,7 @@
     ;; validate payload
     (log/info "Got payload:" payload)
     (case (:command payload)
-      :from-edn (commands/from-config payload)
+      :from-edn (commands/from-edn payload)
       :eval (commands/eval-form payload)
       :stop (commands/stop)
       (do (println "Invalid command")
@@ -65,8 +58,9 @@
     ;; Initialize the mim folder
     (when-not (fs/exists? mim-folder)
       (fs/mkdir mim-folder))
-    (keep-running)
-    ))
+    (spit (fs/expand-home "~/.mim/pid") (mim.pid/current))
+    (state/keep-running)
+    (fs/delete (fs/expand-home "~/.mim/pid"))))
 
 (comment (mount/stop)
          (fs/exists? (fs/expand-home "~/.mim")))
