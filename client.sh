@@ -19,7 +19,7 @@ usage() {
     echo "- mim pid : prints the process ID of a running server"
     echo ""
     echo "- Running a task inside a mim.edn file:"
-    echo "  mim <keyword1> <keyword2>"
+    echo "  mim <keyword1> <keyword2> ... <keywordN>"
     echo ""
     echo "  The keywords should correspond to a path in a mim.edn file that is"
     echo "  contained in the directory your shell is currently at."
