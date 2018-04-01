@@ -37,7 +37,7 @@ ensure_started() {
     # pid file tells us whether the server is already started
     if [ ! -e ~/.mim/pid ]; then
         echo "Starting server..."
-        nohup java -jar ./target/uberjar/mim-0.1.0-SNAPSHOT-standalone.jar &> ~/.mim/log &
+        nohup java -jar ~/.mim/mim.jar &> ~/.mim/log &
     fi
 
     # wait until server has started & created pid file
@@ -64,7 +64,7 @@ send_from_edn() {
     echo "{:cwd \"$CWD\"\
            :command :from-edn\
            :args \"$@\"\
-           :version \"$VERSION\"}" | nc localhost 1234    
+           :version \"$VERSION\"}" | nc localhost 1234 
 }
 
 send_stop() {
@@ -86,6 +86,10 @@ else
     COMMAND=$1
 fi
 
+EXIT_CODE=0
+
+
+# TODO: Capture exit code somehow
 case $COMMAND in
     "version"|"--version"|"-v") echo "mim version $VERSION";;
     "server") start;;
@@ -95,6 +99,10 @@ case $COMMAND in
     # assume it's a path in the mim.edn, send it to the server
     *) send_from_edn $@;;
 esac
+
+if [ "$EXIT_CODE" -gt 0 ]; then
+    exit $EXIT_CODE;
+fi
 
 if [ -r "$TRAMPOLINE_FILE" ]; then
     TRAMPOLINE="$(cat $TRAMPOLINE_FILE)"

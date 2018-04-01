@@ -10,4 +10,5 @@
                  [org.clojure/tools.logging "0.4.0"]]
   :main ^:skip-aot mim.core
   :target-path "target/%s"
+  :uberjar-name "mim.jar"
   :profiles {:uberjar {:aot :all}})
