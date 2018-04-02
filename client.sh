@@ -4,21 +4,24 @@ VERSION='1.0.0'
 CWD=$(pwd)
 TRAMPOLINE_FILE=~/.mim/TRAMPOLINE
 OUT_FILE=~/.mim/out
+PID_FILE=~/.mim/pid
 
 usage() {
     echo "mim version $VERSION"
     echo ""
     echo "Usage:"
-    echo "- mim version/--version/-v : prints the version"
+    echo "- mim --version/-v : prints the version"
     echo ""
-    echo "- mim eval '(+ 1 1)' : evaluates a Clojure expression and prints the result"
+    echo "- mim --eval '(+ 1 1)' : evaluates a Clojure expression and prints the result"
     echo ""
-    echo "- mim server : starts the server without running any commands"
+    echo "- mim --server : starts the server without running any commands"
     echo ""
-    echo "- mim stop : shuts down a running server"
+    echo "- mim --stop : shuts down a running server"
     echo ""
-    echo "- mim pid : prints the process ID of a running server"
+    echo "- mim --pid : prints the process ID of a running server"
     echo ""
+    echo "- mim --clean : clean environment if mim quit unexpectedly"
+    echo "" 
     echo "- Running a task inside a mim.edn file:"
     echo "  mim <keyword1> <keyword2> ... <keywordN>"
     echo ""
@@ -41,13 +44,13 @@ version() {
 
 ensure_started() {
     # pid file tells us whether the server is already started
-    if [ ! -e ~/.mim/pid ]; then
+    if [ ! -e "$PID_FILE" ]; then
         echo "Starting server..."
         nohup java -jar ~/.mim/mim.jar &> ~/.mim/log &
     fi
 
     # wait until server has started & created pid file
-    while [ ! -e ~/.mim/pid ]; do
+    while [ ! -e "$PID_FILE" ]; do
         sleep 1
     done
 }
@@ -66,6 +69,12 @@ pid() {
         echo "No server running."
         EXIT_CODE=1
     fi
+}
+
+clean() {
+    rm $OUT_FILE
+    rm $TRAMPOLINE_FILE
+    rm $PID_FILE
 }
 
 send_from_edn() {
@@ -100,11 +109,12 @@ EXIT_CODE=0
 
 
 case $COMMAND in
-    "version"|"--version"|"-v") version;;
-    "server") start;;
-    "stop") send_stop;;
-    "pid") pid;;
-    "eval") send_form $@;;
+    "--version"|"-v") version;;
+    "--server") start;;
+    "--stop") send_stop;;
+    "--pid") pid;;
+    "--eval") send_form $@;;
+    "--clean") clean;;
     # assume it's a path in the mim.edn, send it to the server
     *) send_from_edn $@;;
 esac
@@ -113,6 +123,7 @@ if [ -r "$OUT_FILE" ]; then
     # once a command completes, we expect it's last line to be
     # ':mim/exit <exit code>'
     OUT_FILE_TAIL=$(tail -1 $OUT_FILE)
+    rm $OUT_FILE
 
     # awk '{print $1}' gets the first column in the output
     FINAL_SAY=$(echo $OUT_FILE_TAIL | awk '{print $1}')
