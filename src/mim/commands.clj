@@ -29,15 +29,16 @@
           ;; e.g. mim/task
           ns-cmd `(do (require 'mim)
                       ~cmd)]
-      (when (nil? cmd)
-        (exit! 1))
-      (log/info (str "Executing `" cmd "`"))
-      (try
-        (eval ns-cmd)
-        (exit! 0)
-        (catch Exception e
-          (log/error (str "An error occurred: " (.getMessage e)))
-          (exit! 1))))))
+      (if (nil? cmd)
+        (exit! 1)
+        (do (log/info (str "Executing `" cmd "`"))
+            (try
+              (eval ns-cmd)
+              (exit! 0)
+              (catch Exception e
+                (log/error (str "An error occurred: " (.getMessage e)))
+                (exit! 1)))))
+      )))
 
 (defn eval-form [{:keys [form in-ns]}]
   (try
