@@ -62,6 +62,20 @@ emacs-mac       lilactown       mim
 clojure         js       
 ```
 
+We can also pass some configuration to the mim/task command, such as the
+directory we want the shell command to run in:
+
+```clojure
+{:home (mim/task "ls"
+                 :cwd "~")}
+```
+
+```
+$ mim home
+:mim/exit 0
+emacs-mac       lilactown       mim
+clojure         js       
+```
 
 ### Trampolining
 
@@ -73,13 +87,14 @@ and prevents some complexity/memory leaks.
 
 Non-trampolined tasks are coming *SOON*
 
-## Examples
+## TODO
 
-...
-
-### Bugs
-
-...
+ - [ ] Owned (non-trampolined) tasks
+ - [ ] Environment variables
+ - [ ] Concurrent tasks
+ - [ ] Examples using conch
+ - [ ] Allow a mim.edn form to reference other key paths
+ - [ ] GUI??
 
 ## License
 
