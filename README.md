@@ -62,6 +62,17 @@ emacs-mac       lilactown       mim
 clojure         js       
 ```
 
+
+### Trampolining
+
+By default, `mim/task` "trampolines" the shell command passed to it. What this
+means in the context of mim, is that instead of running the shell command within
+the mim _server_ process, it instead instructs the client to spawn it and run it
+as a child of the calling shell. This allows the thread to die on the mim server
+and prevents some complexity/memory leaks.
+
+Non-trampolined tasks are coming *SOON*
+
 ## Examples
 
 ...
