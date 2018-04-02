@@ -3,6 +3,7 @@
 VERSION='1.0.0'
 CWD=$(pwd)
 TRAMPOLINE_FILE=~/.mim/TRAMPOLINE
+OUT_FILE=~/.mim/out
 
 usage() {
     echo "mim version $VERSION"
@@ -30,8 +31,13 @@ usage() {
     echo "   :foo (println \"bar\")"
     echo "   :ls {:home (task \"ls -l\""
     echo "                    :cwd \"~\")}}"
+    exit 0
 }
 
+version() {
+    echo "mim version $VERSION"
+    exit 0
+}
 
 ensure_started() {
     # pid file tells us whether the server is already started
@@ -48,14 +54,17 @@ ensure_started() {
 
 start() {
     ensure_started
-    echo "Server started"
+    echo "Server started."
+    EXIT_CODE=0
 }
 
 pid() {
     if [ -e ~/.mim/pid ]; then
         cat ~/.mim/pid
+        EXIT_CODE=0
     else
         echo "No server running."
+        EXIT_CODE=1
     fi
 }
 
@@ -64,19 +73,19 @@ send_from_edn() {
     echo "{:cwd \"$CWD\"\
            :command :from-edn\
            :args \"$@\"\
-           :version \"$VERSION\"}" | nc localhost 1234 
+           :version \"$VERSION\"}" | nc localhost 1234 2>&1 | tee $OUT_FILE
 }
 
 send_stop() {
     echo "{:command :stop\
-           :version \"$VERSION\"}" | nc localhost 1234
+           :version \"$VERSION\"}" | nc localhost 1234 2>&1 | tee $OUT_FILE
 }
 
 send_form() {
     ensure_started
     echo "{:command :eval\
            :version \"$VERSION\"\
-           :form ${@:2}}" | nc localhost 1234
+           :form ${@:2}}" | nc localhost 1234 2>&1 | tee $OUT_FILE
 }
 
 if [ -z "$1" ]; then
@@ -89,9 +98,8 @@ fi
 EXIT_CODE=0
 
 
-# TODO: Capture exit code somehow
 case $COMMAND in
-    "version"|"--version"|"-v") echo "mim version $VERSION";;
+    "version"|"--version"|"-v") version;;
     "server") start;;
     "stop") send_stop;;
     "pid") pid;;
@@ -100,8 +108,22 @@ case $COMMAND in
     *) send_from_edn $@;;
 esac
 
+if [ -r "$OUT_FILE" ]; then
+    # once a command completes, we expect it's last line to be
+    # ':mim/exit <exit code>'
+    OUT_FILE_TAIL=$(tail -1 $OUT_FILE)
+
+    # awk '{print $1}' gets the first column in the output
+    FINAL_SAY=$(echo $OUT_FILE_TAIL | awk '{print $1}')
+
+    if [ "$FINAL_SAY" = ":mim/exit" ]; then
+        # set the exit code to be the second column
+        EXIT_CODE=$(echo $OUT_FILE_TAIL | awk '{print $2}')
+    fi
+fi
+
 if [ "$EXIT_CODE" -gt 0 ]; then
-    exit $EXIT_CODE;
+    exit $EXIT_CODE
 fi
 
 if [ -r "$TRAMPOLINE_FILE" ]; then

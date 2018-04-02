@@ -39,8 +39,7 @@
       :from-edn (commands/from-edn payload)
       :eval (commands/eval-form payload)
       :stop (commands/stop)
-      (do (println "Invalid command")
-          (println 1)))
+      (commands/exit! 1))
     ))
 
 (defstate socket-server

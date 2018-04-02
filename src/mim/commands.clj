@@ -10,6 +10,12 @@
   (with-open [r (io/reader path)]
     (edn/read (java.io.PushbackReader. r))))
 
+
+(defn exit!
+  "Sends an exit code for the client to exit with at the terminal"
+  [code]
+  (println (str ":mim/exit " code)))
+
 (defn from-edn
   "Executes a form that is defined in a mim EDN file"
   [{:keys [cwd args]}]
@@ -23,26 +29,28 @@
           ;; e.g. mim/task
           ns-cmd `(do (require 'mim)
                       ~cmd)]
+      (when (nil? cmd)
+        (exit! 1))
       (log/info (str "Executing `" cmd "`"))
       (try
-        (println (eval ns-cmd))
-        (println 0)
+        (eval ns-cmd)
+        (exit! 0)
         (catch Exception e
-          (println (str "An error occurred: " (.getMessage e)))
-          (println 1))))))
+          (log/error (str "An error occurred: " (.getMessage e)))
+          (exit! 1))))))
 
 (defn eval-form [{:keys [form in-ns]}]
   (try
-    (println (eval form))
-    (println 0)
+    (eval form)
+    (exit! 0)
     (catch Exception e
-      (println (str "An error occurred: " (.getMessage e)))
-      (println 1))))
+      (log/error (str "An error occurred: " (.getMessage e)))
+      (exit! 1))))
 
 (defn stop
   "Stops the server"
   []
-  (println "Stopping server.")
+  (exit! 0)
   (reset! mim.state/running? false))
 
 (comment mim.core/running?)
