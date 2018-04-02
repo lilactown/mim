@@ -77,6 +77,7 @@ send_from_edn() {
 }
 
 send_stop() {
+    echo "Stopping server..."
     echo "{:command :stop\
            :version \"$VERSION\"}" | nc localhost 1234 2>&1 | tee $OUT_FILE
 }
