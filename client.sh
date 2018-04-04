@@ -14,7 +14,7 @@ usage() {
     echo ""
     echo "- mim --eval '(+ 1 1)' : evaluates a Clojure expression and prints the result"
     echo ""
-    echo "- mim --server : starts the server without running any commands"
+    echo "- mim --start : starts the server without running any commands"
     echo ""
     echo "- mim --stop : shuts down a running server"
     echo ""
@@ -22,7 +22,7 @@ usage() {
     echo ""
     echo "- mim --clean : clean environment if mim quit unexpectedly"
     echo "" 
-    echo "- Running a task inside a mim.edn file:"
+    echo "- Running a task inside a mim.edn servepfile:"
     echo "  mim <keyword1> <keyword2> ... <keywordN>"
     echo ""
     echo "  The keywords should correspond to a path in a mim.edn file that is"
@@ -110,7 +110,7 @@ EXIT_CODE=0
 
 case $COMMAND in
     "--version"|"-v") version;;
-    "--server") start;;
+    "--start") start;;
     "--stop") send_stop;;
     "--pid") pid;;
     "--eval") send_form $@;;
