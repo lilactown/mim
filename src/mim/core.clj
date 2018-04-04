@@ -7,8 +7,7 @@
             [me.raynes.fs :as fs]
             [clojure.tools.logging :as log]
             [mim.commands :as commands]
-            [mim.pid :as pid]
-            [mim.state :as state])
+            [mim.pid :as pid])
   (:gen-class))
 
 
@@ -38,28 +37,31 @@
     (case (:command payload)
       :from-edn (commands/from-edn payload)
       :eval (commands/eval-form payload)
-      :stop (commands/stop)
+      :stop (commands/stop!)
       (commands/exit! 1))
     ))
 
 (defstate socket-server
-  :start (socket/start-server {:port 1234
+  :start (do
+           (spit (fs/expand-home "~/.mim/pid") (mim.pid/current))
+           (socket/start-server {:port 1234
                                :name "mim-socket"
-                               :accept 'mim.core/server-handler})
-  :stop (socket/stop-server "mim-socket"))
+                               :accept 'mim.core/server-handler
+                               :server-daemon false}))
+  :stop (do
+          (socket/stop-server "mim-socket")
+          (fs/delete (fs/expand-home "~/.mim/pid"))))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (let [mim-folder (fs/expand-home "~/.mim")]
-    (mount/start)
-    (log/info "started")
     ;; Initialize the mim folder
     (when-not (fs/exists? mim-folder)
       (fs/mkdir mim-folder))
-    (spit (fs/expand-home "~/.mim/pid") (mim.pid/current))
-    (state/keep-running)
-    (fs/delete (fs/expand-home "~/.mim/pid"))))
+    (mount/start)
+    (log/info "started")
+    ))
 
 (comment (mount/stop)
          (fs/exists? (fs/expand-home "~/.mim")))

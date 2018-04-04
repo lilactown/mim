@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.edn :as edn]
             [clojure.tools.logging :as log]
-            [mim.state :as state]))
+            [mount.core :as mount]))
 
 (defn- read-config
   "Reads a mim EDN file and returns its contents"
@@ -48,10 +48,10 @@
       (log/error (str "An error occurred: " (.getMessage e)))
       (exit! 1))))
 
-(defn stop
+(defn stop!
   "Stops the server"
   []
   (exit! 0)
-  (reset! mim.state/running? false))
+  (mount/stop))
 
 (comment mim.core/running?)
